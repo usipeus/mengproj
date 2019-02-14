@@ -10,7 +10,9 @@ The social media website Reddit is a popular destination for internet users. The
 
 Reddit is organized into user-controlled subcommunities called \textit{subreddits}. Any user can create a subreddit; the name of the subreddit dictates the general content found in it. By convention, subreddits are prefixed with \textit{r/ or /r/}, which reflects the URL used to access it. For example, the subreddit \textit{/r/games} is about video games in general, but there are also game-specific subreddits such as \textit{/r/dota2} for discussion about a specific video game. Users can \textit{subscribe} to subreddits to view their posts in the user's personalized frontpage feed.
 
-Content posted to Reddit takes the form of \textit{posts}, which resemble traditional forum threads. Subreddits are \textit{moderated} by users; they have the authority to curate user-submitted posts.
+Content posted to Reddit takes the form of \textit{posts}, which resemble traditional forum threads, and \textit{comments} written in posts. Subreddits are \textit{moderated} by users; they have the authority to curate user-submitted posts.
+
+Finally, \textit{karma} represents the popularity of posts and comments. Users can upvote and downvote a piece of content, and the number of upvotes is a measure of its popularity.
 
 Reddit users are pseudonymous; they are identified only by their username and the content they post on the website. Public user data includes a user's comments, submitted posts, and which posts they have upvoted and downvoted~\cite{redditapi}. Together, this data provides a publicly-visible \textit{behavioral profile} of users on the site.
 
@@ -24,7 +26,15 @@ First of all, do Reddit users who are active on niche subreddits exhibit differe
 
 Secondly, if the above is true, if a given user is not active in a particular niche subreddit, but their behavioral profile is similar to those of users active in that subreddit, are they more likely to become active in that subreddit in the future than the average population is?
 
+Our niche subreddit of choice is 
+
 \section{Experimental Design}
+
+Our intent is to track users' behavior over time. To this end, we intend to harvest Reddit data from one 24-hour period six months ago, then five, then four, all the way to one month ago.
+
+Some subreddits are the default subreddits that all users are subscribed to automatically upon account creation; we believe the content in these subreddits provides a strong baseline for what is considered `normal' user behavior.
+
+We will analyze the 
 
 \bibliography{bib}
 \bibliographystyle{plain}
