@@ -1,14 +1,10 @@
+#!/usr/bin/env python
 import argparse
 import psaw
 import praw
 import toml
 
 from time import sleep
-
-
-def is_reddit_bot(author):
-    return author.name.lower().startswith('auto')
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -33,27 +29,34 @@ if __name__ == '__main__':
     subreddit = 'privacy'
     threshold = 10
 
+    # get relevant posts in the subreddit
     gen = ps.search_submissions(
         limit=100, subreddit=subreddit, before='25d', sort_type='score')
     results = list(gen)
 
-    seen_users = []
     users = []
     for r in results:
         print('author: {}, submission: {}'.format(r.author, r.title))
         for c in r.comments:
-            print('comment author: {}'.format(c.author))
             u = c.author
-            if u in seen_users:
+            if u in users or u is None:
                 continue
-            agg = ps.search_comments(author=u, aggs='subreddit')
-            agg = next(agg)
-            for a in agg:
-                if a['key'] == subreddit and a['doc_count'] >= threshold:
-                    users.append(u)
-            seen_users.append(u)
-            sleep(2)
-            break
+            users.append(u)
+            print('comment author: {}'.format(u))
         break
 
-    print(users)
+    # get statistics for each user
+    stats = {}
+    for u in users:
+        result = ps.redditor_subreddit_activity(u)
+        print(result)
+        # get stats for each comment
+        for comment in u.comments.new(limit=None):
+            print("comment {}, score{}, body {}, subreddit {}, timestamp {}".format(
+                comment, comment.score, comment.body, comment.subreddit, comment.created_utc))
+            break
+        stats[u] = result
+        break
+        sleep(1)
+
+    print(stats)
