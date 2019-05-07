@@ -2,6 +2,7 @@
 import altair as alt
 import argparse
 import json
+import pandas as pd
 import psaw
 import praw
 import requests
@@ -155,9 +156,11 @@ def gen_viz(path):
             comment_ratios.append(v["comment_ratio"]["privacy"])
     print(comment_ratios)
 
-    chart = alt.Chart(comment_ratios).mark_bar().encode(
-        alt.X("ratio of comments in /r/privacy to total comments (binned)", bin=alt.BinParams(maxbins=100)),
-        y="count(*):Q"
+    data = pd.DataFrame({"cr": comment_ratios})
+
+    chart = alt.Chart(data).mark_bar().encode(
+        alt.X("cr:Q", bin=alt.BinParams(maxbins=100)),
+        y="count(*):Q",
     )
     chart.save("testchart.html")
 
