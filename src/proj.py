@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import altair as alt
 import argparse
 import json
 import psaw
@@ -118,10 +119,47 @@ def get_top_user_stats(reddit,
 
 
 def gen_viz(path):
-    print(path)
+    stats = {}
     fnames = [f for f in listdir(path) if isfile(join(path, f))]
     for f in fnames:
-        print(f)
+        try:
+            print(f)
+            fp = open(path + f, "r")
+            data = json.load(fp)
+        except Exception:
+            continue
+
+        comment_ratio = {}
+        submission_ratio = {}
+        cur_sum = 0
+        for k, n in data["comment"].items():
+            cur_sum += n
+        for k, n in data["comment"].items():
+            comment_ratio[k] = n / cur_sum
+
+        cur_sum = 0
+        for k, n in data["submission"].items():
+            cur_sum += n
+        for k, n in data["submission"].items():
+            submission_ratio[k] = n / cur_sum
+
+        user = f[:-5]
+        stats[user] = {}
+        stats[user]["comment_ratio"] = comment_ratio
+        stats[user]["submission_ratio"] = submission_ratio
+
+    comment_ratios = []
+    for k, v in stats.items():
+        print(v)
+        if "privacy" in v["comment_ratio"].keys():
+            comment_ratios.append(v["comment_ratio"]["privacy"])
+    print(comment_ratios)
+
+    chart = alt.Chart(comment_ratios).mark_bar().encode(
+        alt.X("ratio of comments in /r/privacy to total comments (binned)", bin=alt.BinParams(maxbins=100)),
+        y="count(*):Q"
+    )
+    chart.save("testchart.html")
 
 
 if __name__ == '__main__':
