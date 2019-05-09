@@ -154,7 +154,10 @@ def gen_viz(path):
         print(v)
         if "privacy" in v["comment_ratio"].keys():
             comment_ratios.append(v["comment_ratio"]["privacy"])
-    print(comment_ratios)
+    submission_ratios = []
+    for k, v in stats.items():
+        if "privacy" in v["submission_ratio"].keys():
+            submission_ratios.append(v["submission_ratio"]["privacy"])
 
     data = pd.DataFrame({"cr": comment_ratios})
 
@@ -162,7 +165,15 @@ def gen_viz(path):
         alt.X("cr:Q", bin=alt.BinParams(maxbins=100)),
         y="count(*):Q",
     )
-    chart.save("testchart.html")
+    chart.save("privacy_comment_ratios.html")
+
+    data = pd.DataFrame({"sr": submission_ratios})
+
+    chart = alt.Chart(data).mark_bar().encode(
+        alt.X("sr:Q", bin=alt.BinParams(maxbins=100)),
+        y="count(*):Q",
+    )
+    chart.save("privacy_submission_ratios.html")
 
 
 if __name__ == '__main__':
