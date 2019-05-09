@@ -25,3 +25,8 @@ config.toml
 *.synctex.gz
 *.fls
 *.fdb_latexmk
+
+data/
+*.html
+paper/paper.pdf
+
