@@ -34,6 +34,7 @@ def get_comments_from_reddit_api(comment_ids):
 
 # source: https://old.reddit.com/r/datasets/comments/9zhj46/how_to_get_an_archive_of_all_your_comments_from/
 def get_comments(author):
+    all_comments = []
     before = None
     while True:
         comments = get_comments_from_pushshift(
@@ -54,14 +55,17 @@ def get_comments(author):
         # This will then pass the ids collected from Pushshift and query Reddit's API for the most up to date information
         comments = get_comments_from_reddit_api(comment_ids)
         for comment in comments:
+            print(comment)
             comment = comment['data']
             # Do stuff with the comments
+            all_comments.append(comment)
             #print(comment['score'], comment['subreddit'], comment['author'])
 
         time.sleep(
             2
         )  # I'm not sure how often you can query the Reddit API without oauth but once every two seconds should work fine
-    return comments
+    print("got comments from user {}\n{}".format(author, comments))
+    return all_comments
 
 
 def get_top_user_stats(reddit,
@@ -72,6 +76,8 @@ def get_top_user_stats(reddit,
                        subreddit=None):
     # get relevant posts in the subreddit
     print("Getting submissions:")
+    print("before: {}, limit: {}, sort_type: {}, subreddit: {}".format(
+        before, limit, sort_type, subreddit))
     gen = ps.search_submissions(
         limit=limit, subreddit=subreddit, before=before, sort_type=sort_type)
     results = list(gen)
@@ -90,30 +96,30 @@ def get_top_user_stats(reddit,
             print('comment author: {}'.format(u))
 
     # get statistics for each user
-    userstats = {}
     for u in users:
         fname = "./data/" + subreddit + "/" + u.name + ".json"
         if isfile(fname):
-            continue
+            #continue
+            pass
         with open(fname, "w") as f:
             result = ps.redditor_subreddit_activity(u)
-            userstats['activity'] = result
             print(result)
             # get stats for each comment
             commentstats = []
             for comment in get_comments(u.name):
                 print(
                     "comment {}, score {}, subreddit {}, timestamp {}".format(
-                        comment, comment.score, comment.subreddit.display_name,
-                        comment.created_utc))
+                        comment, comment['score'], comment['subreddit'],
+                        comment['created_utc']))
+                #comment_submission = reddit.submission(comment['link_id'])
                 commentstats.append({
-                    "score": comment.score,
-                    "subreddit": comment.subreddit.display_name,
-                    "subreddit_id": comment.subreddit.name,
-                    "time": comment.created_utc,
-                    "subtime": comment.submission.created_utc,
-                    "subnumcomments": comment.submission.num_comments,
-                    "subscore": comment.submission.score
+                    "score": comment['score'],
+                    "subreddit": comment['subreddit'],
+                    "time": comment['created_utc'],
+                    #"subtime":
+                    #comment_submission.created_utc,
+                    #"subnumcomments":
+                    #comment_submission.num_comments
                 })
             result['commentstats'] = commentstats
             json.dump(result, f)
@@ -159,18 +165,18 @@ def gen_viz(path):
         if "privacy" in v["submission_ratio"].keys():
             submission_ratios.append(v["submission_ratio"]["privacy"])
 
-    data = pd.DataFrame({"cr": comment_ratios})
+    data = pd.DataFrame({"Ratio of Comments in /r/privacy to Total Comments": comment_ratios})
 
     chart = alt.Chart(data).mark_bar().encode(
-        alt.X("cr:Q", bin=alt.BinParams(maxbins=100)),
+        alt.X("Ratio of Comments in /r/privacy to Total Comments:Q", bin=alt.BinParams(maxbins=100)),
         y="count(*):Q",
     )
     chart.save("privacy_comment_ratios.html")
 
-    data = pd.DataFrame({"sr": submission_ratios})
+    data = pd.DataFrame({"Ratio of Submissions to /r/privacy to Total Submissions": submission_ratios})
 
     chart = alt.Chart(data).mark_bar().encode(
-        alt.X("sr:Q", bin=alt.BinParams(maxbins=100)),
+        alt.X("Ratio of Submissions to /r/privacy to Total Submissions:Q", bin=alt.BinParams(maxbins=100)),
         y="count(*):Q",
     )
     chart.save("privacy_submission_ratios.html")
